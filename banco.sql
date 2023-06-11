@@ -1,0 +1,107 @@
+CREATE TABLE IF NOT EXISTS RANK (
+	id_rank INT PRIMARY KEY AUTO_INCREMENT,
+	rk_name VARCHAR(50) NOT NULL,
+	rk_description  VARCHAR (100) NOT NULL,
+	rk_min INT NOT NULL,
+	rk_max INT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS USERS (
+	id_user INT PRIMARY KEY AUTO_INCREMENT,
+	us_name VARCHAR(200) NOT NULL,
+	us_email VARCHAR(256) NOT NULL,
+	us_user VARCHAR(20) NOT NULL,
+	us_password VARCHAR(256) NOT NULL,
+	us_last_login DATETIME NOT NULL,
+	us_created_at DATETIME NOT NULL,
+	us_day_streak INT DEFAULT 0,
+	us_rank INT NOT NULL,
+	FOREIGN KEY (us_rank) REFERENCES RANK(id_rank)
+);
+
+CREATE TABLE IF NOT EXISTS DECK (
+	id_deck INT PRIMARY KEY AUTO_INCREMENT,
+	dk_user INT NOT NULL,
+	FOREIGN KEY (dk_user) REFERENCES USERS(id_user)
+);
+
+CREATE TABLE IF NOT EXISTS CATEGORY (
+	id_category INT PRIMARY KEY AUTO_INCREMENT,
+	ct_name VARCHAR(100) NOT NULL,
+	ct_description VARCHAR(100),
+	ct_image TEXT NOT NULL,
+	ct_icon TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS PHRASE (
+	id_phrase INT PRIMARY KEY AUTO_INCREMENT,
+	ph_category INT NOT NULL,
+	ph_phrase TEXT NOT NULL,
+	FOREIGN KEY (ph_category) REFERENCES CATEGORY(id_category)
+);
+
+CREATE TABLE IF NOT EXISTS WORD (
+	id_word INT PRIMARY KEY AUTO_INCREMENT,
+	wd_word VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS EXPRESSION (
+	id_expression INT PRIMARY KEY AUTO_INCREMENT,
+	ex_expression VARCHAR(80) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS PHRASE_WORD (
+	id_phrase_word INT PRIMARY KEY AUTO_INCREMENT,
+	phwd_phrase INT NOT NULL,
+	phwd_word INT NOT NULL,
+	phwd_order INT NOT NULL,
+	FOREIGN KEY (phwd_phrase) REFERENCES PHRASE(id_phrase),
+	FOREIGN KEY (phwd_word) REFERENCES WORD(id_word)
+);
+
+CREATE TABLE IF NOT EXISTS PHRASE_EXPRESSION (
+	id_phrase_expression INT PRIMARY KEY AUTO_INCREMENT,
+	phex_phrase INT NOT NULL,
+	phex_expression INT NOT NULL,
+	phex_order INT NOT NULL,
+	FOREIGN KEY (phex_phrase) REFERENCES PHRASE(id_phrase),
+	FOREIGN KEY (phex_expression) REFERENCES EXPRESSION(id_expression)
+);
+
+CREATE TABLE IF NOT EXISTS EXPRESSION_WORD (
+	id_expression_word INT PRIMARY KEY AUTO_INCREMENT,
+	exwd_word INT NOT NULL,
+	exwd_expression INT NOT NULL,
+	FOREIGN KEY (exwd_word) REFERENCES WORD(id_word),
+	FOREIGN KEY (exwd_expression) REFERENCES EXPRESSION(id_expression)
+);
+
+
+CREATE TABLE IF NOT EXISTS PHRASE_DECK (
+	id_deck_phrase INT PRIMARY KEY AUTO_INCREMENT,
+	phdk_phrase INT NOT NULL,
+	phdk_deck INT NOT NULL,
+	FOREIGN KEY (phdk_phrase) REFERENCES PHRASE(id_phrase),
+	FOREIGN KEY (phdk_deck) REFERENCES DECK(id_deck)
+);
+
+CREATE TABLE IF NOT EXISTS STUDY_SESSION (
+	id_study_session INT PRIMARY KEY AUTO_INCREMENT,
+	st_deadline DATETIME NOT NULL,
+	st_completed BOOLEAN DEFAULT FALSE,
+	st_studied_in DATETIME NOT NULL,
+	st_user INT NOT NULL,
+	FOREIGN KEY (st_user) REFERENCES USERS(id_user)
+);
+
+CREATE TABLE IF NOT EXISTS REVIEW_PHRASE (
+	id_review_phrase INT PRIMARY KEY AUTO_INCREMENT,
+	reph_status BOOLEAN NOT NULL,
+	reph_date DATETIME NOT NULL,
+	reph_phrase_deck INT NOT NULL,
+	reph_study_session INT NOT NULL,
+	FOREIGN KEY (reph_phrase_deck) REFERENCES PHRASE_DECK(id_deck_phrase),
+	FOREIGN KEY (reph_study_session) REFERENCES STUDY_SESSION(id_study_session)
+);
+
+
