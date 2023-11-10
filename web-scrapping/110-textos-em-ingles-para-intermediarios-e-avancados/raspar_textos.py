@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+
 dominio = "https://aulasdeinglesgratis.net/"
 
 
@@ -25,7 +26,7 @@ def start(links):
             palavras = frase.split(" ")
 
             if len(palavras) < 3:
-                break                
+                continue                
 
             frases.append(frase)
     # return dados_final
@@ -33,5 +34,12 @@ def start(links):
     return frases
 
 def save(dados):
-    with open("textos.json", "w", encoding="utf-8") as arquivo_de_texto:
-        json.dump(dados, arquivo_de_texto, ensure_ascii=False, indent=4)
+    with open("textos.csv", "w", encoding="utf-8") as arquivo_de_texto:
+        # json.dump(dados, arquivo_de_texto, ensure_ascii=False, indent=4)
+
+        csv_string = ""
+
+        for frase in dados:
+            csv_string += "{}\n".format(frase)
+
+        arquivo_de_texto.write(csv_string)

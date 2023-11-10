@@ -11,20 +11,14 @@ def start():
 
         link = "https://aulasdeinglesgratis.net/category/110-textos-em-ingles-para-intermediarios-e-avancados/page/{}".format(qtd)
 
-        print(link)
-        # resposta = requests.get(link)
-        # soup = BeautifulSoup(resposta.content, "html.parser")
+        print("Capturando links da url: {}".format(link))
+        resposta = requests.get(link)
+        soup = BeautifulSoup(resposta.content, "html.parser")
 
-
-        # tags_a = soup.find_all("a.more-link")
-
+        tags_a = soup.find_all("a", {"class": "more-link"})
         
-        # for tag_a in tags_a:
+        for tag_a in tags_a:
             
-        #     links.append(tag_a.attrs["href"])
-            
-        #     div_table = soup.select_one("table")
-        #     td = div_table.find("td")
-            
+            links.append(tag_a.attrs["href"])
 
-        # return links
+    return links
