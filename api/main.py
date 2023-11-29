@@ -252,30 +252,25 @@ db = mysql.connector.connect(
     password=db_config['password'],
     database=db_config['database']
 )
-cursor = db.cursor()
+cursor = db.cursor(buffered=True)
 
 # Rota para obter frases com filtros
 @app.route('/phrases', methods=['GET'])
 def get_filtered_phrases():
     filter_by_phrase = request.args.get('phrase')
-    filter_by_word = request.args.get('word')
     filter_by_subject = request.args.get('subject')
 
-    query = "SELECT p.id_phrase, p.ph_phrase, s.sb_name, w.wd_word FROM phrase AS p"
+    query = "SELECT p.id_phrase, p.ph_phrase, s.sb_name FROM phrase AS p"
     query += " JOIN subject AS s ON p.ph_subject = s.id_subject"
-    query += " LEFT JOIN phrase_word AS pw ON p.id_phrase = pw.phwd_phrase"
-    query += " LEFT JOIN word AS w ON pw.phwd_word = w.id_word"
     where_conditions = []
 
     if filter_by_phrase:
         where_conditions.append(f"p.ph_phrase LIKE '%{filter_by_phrase}%'")
 
-    if filter_by_word:
-        where_conditions.append(f"w.wd_word LIKE '%{filter_by_word}%'")
-
     if filter_by_subject:
         where_conditions.append(f"s.sb_name LIKE '%{filter_by_subject}%'")
 
+    
     if where_conditions:
         query += " WHERE " + " AND ".join(where_conditions)
 
@@ -287,8 +282,7 @@ def get_filtered_phrases():
         phrase_dict = {
             "id_phrase": row[0],
             "ph_phrase": row[1],
-            "sb_name": row[2],
-            "wd_word": row[3]
+            "sb_name": row[2]
         }
         filtered_phrases.append(phrase_dict)
 
@@ -350,8 +344,6 @@ subjects_index = {
 # Rota para adicionar uma nova frase
 @app.route('/phrases', methods=['POST'])
 def add_phrases():
-    
-
     ph_subject = 0 # Só pra não bugar.
 
     data = request.json
@@ -384,8 +376,6 @@ def add_phrases():
                 db.commit()
                 
                 phrase_id = cursor.lastrowid
-
-                cursor.fetchall()
 
                 for word in words:
                     if is_word_in_list(word):
@@ -442,11 +432,12 @@ def add_phrases():
             db.commit()
             phrase_id = cursor.lastrowid
 
-            cursor.fetchall()
 
             map_words_to_phrase(phrase_id, words)
 
             return jsonify({"message": "Frase adicionada com sucesso!"}), 201
+        else:
+            return jsonify({"message": "A frase já existe no banco de dados."}), 409
     else:
         return jsonify({"error": "Entrada inválida. Deve ser uma única frase ou uma lista de frases"}), 400
     
